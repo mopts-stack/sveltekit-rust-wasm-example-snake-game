@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 
 	let sum: WebAssembly.ExportValue;
+	let mem: WebAssembly.Memory;
 
 	async function init() {
 		// const byteArray = new Int8Array([
@@ -12,7 +13,14 @@
 		// 	0x02, 0x00, 0x01, 0x61, 0x01, 0x01, 0x62
 		// ]);
 
+		const memory = new WebAssembly.Memory({
+			initial: 1
+		});
+
 		const importObject = {
+			js: {
+				memory
+			},
 			console: {
 				log: () => {
 					console.log('Just logging something');
@@ -28,6 +36,7 @@
 
 		const wasm = await WebAssembly.instantiate(buffer, importObject);
 		sum = wasm.instance.exports.sum;
+		mem = wasm.instance.exports.mem as WebAssembly.Memory;
 	}
 
 	onMount(async () => {
@@ -35,5 +44,10 @@
 		// @ts-ignore
 		const result = sum(100, 1000);
 		console.log(result);
+
+		const uint8Array = new Uint8Array(mem.buffer, 0, 2);
+		const text = new TextDecoder().decode(uint8Array);
+
+		console.log(text);
 	});
 </script>
