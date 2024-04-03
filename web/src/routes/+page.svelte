@@ -2,9 +2,7 @@
 	import init, { World } from 'wasm-test';
 	import { onMount } from 'svelte';
 
-	import { update, draw } from '$lib/game';
-
-	const CELL_SIZE = 48;
+	import { update, draw, CELL_SIZE, WORLD_WIDTH, SNAKE_SPAWN_IDX } from '$lib/game';
 
 	let ctx: CanvasRenderingContext2D | null;
 	let canvas: HTMLCanvasElement | null;
@@ -12,7 +10,7 @@
 
 	onMount(() => {
 		init().then((_) => {
-			world = World.new();
+			world = World.new(WORLD_WIDTH, SNAKE_SPAWN_IDX);
 
 			canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
 			ctx = canvas.getContext('2d');

@@ -1,11 +1,14 @@
 import { World } from 'wasm-test';
 
-const CELL_SIZE = 48;
+export const CELL_SIZE = 48;
+export const WORLD_WIDTH = 16;
+export const SNAKE_SPAWN_IDX = Date.now() % (WORLD_WIDTH * WORLD_WIDTH);
+
+const FPS = 7;
 
 export const update = (ctx: CanvasRenderingContext2D | null, canvas: HTMLCanvasElement | null, world: World | null) => {
     setTimeout(() => {
         if (ctx === null || world === null || canvas === null) return;
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         world.update();
@@ -14,7 +17,7 @@ export const update = (ctx: CanvasRenderingContext2D | null, canvas: HTMLCanvasE
 
         // invoke update again before repaint event
         requestAnimationFrame(() => update(ctx, canvas, world));
-    }, 100);
+    }, 1000 / FPS);
 }
 
 export const draw = (ctx: CanvasRenderingContext2D | null, canvas: HTMLCanvasElement | null, world: World | null) => {
