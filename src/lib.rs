@@ -24,6 +24,7 @@ pub enum Direction {
 }
 
 #[wasm_bindgen]
+#[derive(Clone)]
 pub struct SnakeCell(usize);
 
 struct Snake {
@@ -76,6 +77,14 @@ impl World {
     }
 
     pub fn change_snake_dir(&mut self, direction: Direction) {
+        let next_cell = self.generate_next_snake_cell(&direction);
+
+        // in fact if the next step cell is equal to the previous body part's cell it means
+        // we are tending to move backward which is not possible
+        if self.snake.body[1].0 == next_cell.0 {
+            return;
+        }
+
         self.snake.direction = direction;
     }
 
@@ -95,11 +104,19 @@ impl World {
     }
 
     pub fn calculate_snake_cell(&mut self) {
-        let next_cell = self.generate_next_snake_cell();
+        let temp = self.snake.body.clone();
+
+        let next_cell = self.generate_next_snake_cell(&self.snake.direction);
         self.snake.body[0] = next_cell;
+
+        let length = self.snake.body.len();
+
+        for i in 1..length {
+            self.snake.body[i] = SnakeCell(temp[i - 1].0);
+        }
     }
 
-    fn generate_next_snake_cell(&self) -> SnakeCell {
+    fn generate_next_snake_cell(&self, direction: &Direction) -> SnakeCell {
         let snake_idx = self.snake_head_idx();
 
         let row = snake_idx / self.width;
@@ -112,7 +129,7 @@ impl World {
         //     Direction::Left => SnakeCell((row * self.width) + (snake_idx - 1) % self.width),
         // }
 
-        match self.snake.direction {
+        match direction {
             Direction::Up => {
                 let treshold = snake_idx - (row * self.width);
                 if snake_idx == treshold {
