@@ -152,9 +152,17 @@ impl World {
             self.snake.body[i] = SnakeCell(temp[i - 1].0);
         }
 
+        // check if the head colliding with the reward
         if self.reward_cell == self.snake_head_idx() {
+            // make sure snake doesn't grow to the size of the grid
+            if self.snake.body.len() < self.size {
+                self.reward_cell = spawn_reward(&self.snake.body, self.size);
+            } else {
+                // send it off screen
+                self.reward_cell = 1000;
+            }
+
             self.snake.body.push(SnakeCell(self.snake.body[1].0));
-            self.reward_cell = spawn_reward(&self.snake.body, self.size);
         }
     }
 

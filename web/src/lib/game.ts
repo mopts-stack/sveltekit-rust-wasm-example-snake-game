@@ -2,10 +2,10 @@ import { World, Direction, type InitOutput } from 'wasm-test';
 import { random } from './utils';
 
 export const CELL_SIZE = 48;
-export const WORLD_WIDTH = 16;
+export const WORLD_WIDTH = 5;
 export const SNAKE_SPAWN_IDX = random(WORLD_WIDTH * WORLD_WIDTH);
 
-const FPS = 10;
+const FPS = 5;
 
 export class SnakeGame {
     constructor(readonly wasm: InitOutput, readonly ctx: CanvasRenderingContext2D, readonly canvas: HTMLCanvasElement, readonly world: World) {
@@ -100,6 +100,10 @@ export class SnakeGame {
         this.ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
         this.ctx.stroke();
+
+        // if (idx === 1000) {
+        //     alert("You Won!");
+        // }
     }
 }
 
