@@ -13,7 +13,7 @@
 	}
 
 	onMount(() => {
-		init().then((_) => {
+		init().then((wasm) => {
 			world = World.new(WORLD_WIDTH, SNAKE_SPAWN_IDX);
 
 			canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
@@ -26,6 +26,13 @@
 
 			// Update loop
 			update(ctx, canvas, world);
+
+			const snakeCellPtr = world.snake_cells();
+			const snakeLen = world.snake_length();
+
+			const snakeCells = new Uint32Array(wasm.memory.buffer, snakeCellPtr, snakeLen);
+
+			console.log(snakeCells);
 
 			// Add the event listener if in a browser environment
 			if (typeof window !== 'undefined') {
