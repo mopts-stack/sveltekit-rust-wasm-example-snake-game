@@ -1,4 +1,4 @@
-import { World, Direction } from 'wasm-test';
+import { World, Direction, type InitOutput } from 'wasm-test';
 
 export const CELL_SIZE = 48;
 export const WORLD_WIDTH = 16;
@@ -6,77 +6,81 @@ export const SNAKE_SPAWN_IDX = Date.now() % (WORLD_WIDTH * WORLD_WIDTH);
 
 const FPS = 7;
 
-export const update = (ctx: CanvasRenderingContext2D | null, canvas: HTMLCanvasElement | null, world: World | null) => {
-    setTimeout(() => {
-        if (ctx === null || world === null || canvas === null) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        world.update();
-
-        draw(ctx, canvas, world);
-
-        // invoke update again before repaint event
-        requestAnimationFrame(() => update(ctx, canvas, world));
-    }, 1000 / FPS);
-}
-
-export const keyboardEvents = (e: KeyboardEvent, world: World | null) => {
-    if (world === null) return;
-
-    switch (e.code) {
-        case "ArrowUp":
-            world.change_snake_dir(Direction.Up);
-            break;
-
-        case "ArrowDown":
-            world.change_snake_dir(Direction.Down);
-            break;
-
-        case "ArrowRight":
-            world.change_snake_dir(Direction.Right);
-            break;
-
-        case "ArrowLeft":
-            world.change_snake_dir(Direction.Left);
-            break;
-    }
-}
-
-export const draw = (ctx: CanvasRenderingContext2D | null, canvas: HTMLCanvasElement | null, world: World | null) => {
-    if (ctx === null || world === null || canvas === null) return;
-
-    drawWorld(ctx, world);
-    drawSnake(ctx, world);
-}
-
-const drawWorld = (ctx: CanvasRenderingContext2D | null, world: World | null) => {
-    if (ctx === null || world === null) return;
-
-    ctx.beginPath();
-
-    for (let x = 0; x < world.width() + 1; ++x) {
-        ctx.moveTo(CELL_SIZE * x, 0);
-        ctx.lineTo(CELL_SIZE * x, world.width() * CELL_SIZE);
+export class SnakeGame {
+    constructor(readonly wasm: InitOutput, readonly ctx: CanvasRenderingContext2D, readonly canvas: HTMLCanvasElement, readonly world: World) {
     }
 
-    for (let y = 0; y < world.width() + 1; ++y) {
-        ctx.moveTo(0, CELL_SIZE * y);
-        ctx.lineTo(world.width() * CELL_SIZE, CELL_SIZE * y);
+    update = () => {
+        setTimeout(() => {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+            this.world.update();
+
+            this.draw();
+
+            // invoke update again before repaint event
+            requestAnimationFrame(this.update);
+        }, 1000 / FPS);
     }
 
-    ctx.stroke();
-};
+    keyboardEvents = (e: KeyboardEvent) => {
+        switch (e.code) {
+            case "ArrowUp":
+                this.world.change_snake_dir(Direction.Up);
+                break;
 
-const drawSnake = (ctx: CanvasRenderingContext2D | null, world: World | null) => {
-    if (ctx === null || world === null) return;
+            case "ArrowDown":
+                this.world.change_snake_dir(Direction.Down);
+                break;
 
-    const snakeIdx = world?.snake_head_idx();
-    const col = snakeIdx % world.width();
-    const row = Math.floor(snakeIdx / world.width());
+            case "ArrowRight":
+                this.world.change_snake_dir(Direction.Right);
+                break;
 
-    ctx.beginPath();
+            case "ArrowLeft":
+                this.world.change_snake_dir(Direction.Left);
+                break;
+        }
+    }
 
-    ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    draw = () => {
+        this.drawWorld();
+        this.drawSnake();
+    }
 
-    ctx.stroke();
-};
+    private drawWorld = () => {
+        this.ctx.beginPath();
+
+        for (let x = 0; x < this.world.width() + 1; ++x) {
+            this.ctx.moveTo(CELL_SIZE * x, 0);
+            this.ctx.lineTo(CELL_SIZE * x, this.world.width() * CELL_SIZE);
+        }
+
+        for (let y = 0; y < this.world.width() + 1; ++y) {
+            this.ctx.moveTo(0, CELL_SIZE * y);
+            this.ctx.lineTo(this.world.width() * CELL_SIZE, CELL_SIZE * y);
+        }
+
+        this.ctx.stroke();
+    };
+
+    private drawSnake = () => {
+        const snakeCells = new Uint32Array(
+            this.wasm.memory.buffer,
+            this.world.snake_cells(),
+            this.world.snake_length()
+        );
+
+        this.ctx.beginPath();
+
+        snakeCells.forEach(cellIdx => {
+            const col = cellIdx % this.world.width();
+            const row = Math.floor(cellIdx / this.world.width());
+
+            this.ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        });
+
+        this.ctx.stroke();
+    };
+}
+
