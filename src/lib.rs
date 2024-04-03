@@ -15,6 +15,12 @@ extern "C" {
 
 // SNAKE GAME IMPLEMENTATION
 
+#[wasm_bindgen(module = "/web/src/lib/utils.ts")]
+extern "C" {
+    // from javascript defined in utils
+    fn now() -> usize;
+}
+
 #[wasm_bindgen]
 pub enum Direction {
     Up,
@@ -59,12 +65,16 @@ pub struct World {
 #[wasm_bindgen]
 impl World {
     pub fn new(width: usize, snake_idx: usize) -> Self {
+        let size = width * width;
+
+        let reward_cell = now() % size;
+
         Self {
             width,
-            size: width * width,
+            size,
             snake: Snake::new(snake_idx, 3),
             next_cell: None,
-            reward_cell: 10,
+            reward_cell,
         }
     }
 
