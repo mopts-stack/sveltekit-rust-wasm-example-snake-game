@@ -18,10 +18,11 @@
 
 			game = new SnakeGame(wasm, ctx, canvas, world);
 
-			game.draw();
+			// initial render
+			game.render();
 
-			// Update loop
-			game.update();
+			// Main Game Loop
+			game.mainLoop();
 
 			// Add the event listener if in a browser environment
 			if (typeof window !== 'undefined') {

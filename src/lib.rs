@@ -94,31 +94,57 @@ impl World {
         self.snake.body.len()
     }
 
-    pub fn update(&mut self) {
+    pub fn calculate_snake_cell(&mut self) {
+        let next_cell = self.generate_next_snake_cell();
+        self.snake.body[0] = next_cell;
+    }
+
+    fn generate_next_snake_cell(&self) -> SnakeCell {
         let snake_idx = self.snake_head_idx();
 
-        let (row, col) = self.index_to_cell(snake_idx);
+        let row = snake_idx / self.width;
 
-        let (row, col) = match self.snake.direction {
-            Direction::Up => ((row - 1) % self.width, col),
-            Direction::Down => ((row + 1) % self.width, col),
-            Direction::Right => (row, (col + 1) % self.width),
-            Direction::Left => (row, (col - 1) % self.width),
-        };
+        // Modulo and division operations are expensive
+        // match self.snake.direction {
+        //     Direction::Up => SnakeCell((snake_idx - self.width) % self.size),
+        //     Direction::Down => SnakeCell((snake_idx + self.width) % self.size),
+        //     Direction::Right => SnakeCell((row * self.width) + (snake_idx + 1) % self.width),
+        //     Direction::Left => SnakeCell((row * self.width) + (snake_idx - 1) % self.width),
+        // }
 
-        let next_idx = self.cell_to_index(row, col);
-        self.set_snake_head_idx(next_idx);
-    }
-
-    fn set_snake_head_idx(&mut self, idx: usize) {
-        self.snake.body[0].0 = idx;
-    }
-
-    fn index_to_cell(&self, idx: usize) -> (usize, usize) {
-        (idx / self.width, idx % self.width)
-    }
-
-    fn cell_to_index(&self, row: usize, col: usize) -> usize {
-        (row * self.width) + col
+        match self.snake.direction {
+            Direction::Up => {
+                let treshold = snake_idx - (row * self.width);
+                if snake_idx == treshold {
+                    SnakeCell(self.size - self.width + treshold)
+                } else {
+                    SnakeCell(snake_idx - self.width)
+                }
+            }
+            Direction::Down => {
+                let treshold = snake_idx + ((self.width - row) * self.width);
+                if snake_idx + self.width == treshold {
+                    SnakeCell(treshold - ((row + 1) * self.width))
+                } else {
+                    SnakeCell(snake_idx + self.width)
+                }
+            }
+            Direction::Right => {
+                let treshold = (row + 1) * self.width;
+                if snake_idx + 1 == treshold {
+                    SnakeCell(treshold - self.width)
+                } else {
+                    SnakeCell(snake_idx + 1)
+                }
+            }
+            Direction::Left => {
+                let treshold = row * self.width;
+                if snake_idx == treshold {
+                    SnakeCell(treshold + self.width - 1)
+                } else {
+                    SnakeCell(snake_idx - 1)
+                }
+            }
+        }
     }
 }

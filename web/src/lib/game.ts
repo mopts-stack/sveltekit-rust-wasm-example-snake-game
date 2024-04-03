@@ -10,16 +10,16 @@ export class SnakeGame {
     constructor(readonly wasm: InitOutput, readonly ctx: CanvasRenderingContext2D, readonly canvas: HTMLCanvasElement, readonly world: World) {
     }
 
-    update = () => {
+    mainLoop = () => {
         setTimeout(() => {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            this.world.update();
+            this.world.calculate_snake_cell();
 
-            this.draw();
+            this.render();
 
             // invoke update again before repaint event
-            requestAnimationFrame(this.update);
+            requestAnimationFrame(this.mainLoop);
         }, 1000 / FPS);
     }
 
@@ -43,12 +43,12 @@ export class SnakeGame {
         }
     }
 
-    draw = () => {
-        this.drawWorld();
-        this.drawSnake();
+    render = () => {
+        this.renderWorld();
+        this.renderSnake();
     }
 
-    private drawWorld = () => {
+    private renderWorld = () => {
         this.ctx.beginPath();
 
         for (let x = 0; x < this.world.width() + 1; ++x) {
@@ -64,7 +64,7 @@ export class SnakeGame {
         this.ctx.stroke();
     };
 
-    private drawSnake = () => {
+    private renderSnake = () => {
         const snakeCells = new Uint32Array(
             this.wasm.memory.buffer,
             this.world.snake_cells(),
@@ -73,9 +73,11 @@ export class SnakeGame {
 
         this.ctx.beginPath();
 
-        snakeCells.forEach(cellIdx => {
+        snakeCells.forEach((cellIdx, i) => {
             const col = cellIdx % this.world.width();
             const row = Math.floor(cellIdx / this.world.width());
+
+            this.ctx.fillStyle = i === 0 ? "#7878db" : "#000000";
 
             this.ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         });
