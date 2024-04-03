@@ -46,6 +46,7 @@ export class SnakeGame {
     render = () => {
         this.renderWorld();
         this.renderSnake();
+        this.renderReward();
     }
 
     private renderWorld = () => {
@@ -84,5 +85,20 @@ export class SnakeGame {
 
         this.ctx.stroke();
     };
+
+    private renderReward = () => {
+        const idx = this.world.reward_cell();
+
+        const col = idx % this.world.width();
+        const row = Math.floor(idx / this.world.width());
+
+        this.ctx.beginPath();
+
+        this.ctx.fillStyle = "#FF0000";
+
+        this.ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+        this.ctx.stroke();
+    }
 }
 
