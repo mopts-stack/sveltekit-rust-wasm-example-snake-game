@@ -4,7 +4,7 @@ export const CELL_SIZE = 48;
 export const WORLD_WIDTH = 16;
 export const SNAKE_SPAWN_IDX = Date.now() % (WORLD_WIDTH * WORLD_WIDTH);
 
-const FPS = 7;
+const FPS = 10;
 
 export class SnakeGame {
     constructor(readonly wasm: InitOutput, readonly ctx: CanvasRenderingContext2D, readonly canvas: HTMLCanvasElement, readonly world: World) {
@@ -14,7 +14,7 @@ export class SnakeGame {
         setTimeout(() => {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            this.world.calculate_snake_cell();
+            this.world.calculate_snake_next_cell();
 
             this.render();
 
