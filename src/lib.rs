@@ -1,6 +1,14 @@
 use wasm_bindgen::prelude::*;
 
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 #[wasm_bindgen]
 pub fn greet(name: &str) {
-    println!("Hi there {}", name);
+    alert(format!("Hi there {}", name).as_str());
+}
+
+#[wasm_bindgen]
+extern "C" {
+    pub fn alert(s: &str);
 }

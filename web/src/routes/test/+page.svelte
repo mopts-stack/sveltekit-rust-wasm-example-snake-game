@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import init, { greet, type InitOutput } from 'wasm-test';
+
 	let sum: WebAssembly.ExportValue;
 	let mem: WebAssembly.Memory;
+	let wasm_test: InitOutput;
 
-	async function init() {
+	async function start() {
 		// const byteArray = new Int8Array([
 		// 	0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x07, 0x01, 0x60, 0x02, 0x7f, 0x7f,
 		// 	0x01, 0x7f, 0x03, 0x02, 0x01, 0x00, 0x07, 0x07, 0x01, 0x03, 0x73, 0x75, 0x6d, 0x00, 0x00,
@@ -37,10 +40,13 @@
 		const wasm = await WebAssembly.instantiate(buffer, importObject);
 		sum = wasm.instance.exports.sum;
 		mem = wasm.instance.exports.mem as WebAssembly.Memory;
+
+		// actual wasm generated from rust
+		wasm_test = await init(); // for demonstration purposes, we can just run the init()
 	}
 
 	onMount(async () => {
-		await init();
+		await start();
 		// @ts-ignore
 		const result = sum(100, 1000);
 		console.log(result);
@@ -49,5 +55,7 @@
 		const text = new TextDecoder().decode(uint8Array);
 
 		console.log(text);
+
+		greet('navid'); // we could use wasm_test.greet instead
 	});
 </script>
