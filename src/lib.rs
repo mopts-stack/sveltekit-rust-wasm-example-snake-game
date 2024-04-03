@@ -14,7 +14,7 @@ extern "C" {
 }
 
 // SNAKE GAME IMPLEMENTATION
-const SIZE: usize = 16;
+const WIDTH: usize = 16;
 
 struct SnakeCell(usize);
 
@@ -33,13 +33,15 @@ impl Snake {
 #[wasm_bindgen]
 pub struct World {
     width: usize,
+    size: usize,
     snake: Snake,
 }
 
 impl Default for World {
     fn default() -> Self {
         Self {
-            width: SIZE,
+            width: WIDTH,
+            size: WIDTH * WIDTH,
             snake: Snake::new(10),
         }
     }
@@ -55,7 +57,16 @@ impl World {
         self.width
     }
 
+    pub fn size(&self) -> usize {
+        self.size
+    }
+
     pub fn snake_head_idx(&self) -> usize {
         self.snake.body[0].0
+    }
+
+    pub fn update(&mut self) {
+        let snake_idx = self.snake_head_idx();
+        self.snake.body[0].0 = (snake_idx + 1) % (self.size);
     }
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import init, { World } from 'wasm-test';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 
 	const CELL_SIZE = 48;
 
@@ -8,6 +8,8 @@
 	let canvas: HTMLCanvasElement | null;
 
 	let world: World | null;
+
+	let interval: number;
 
 	onMount(() => {
 		init().then((_) => {
@@ -19,12 +21,25 @@
 			canvas.height = world.width() * CELL_SIZE;
 			canvas.width = world.width() * CELL_SIZE;
 
-			drawWorld();
+			// Update loop
+			interval = setInterval(() => {
+				if (ctx === null || world === null) return;
 
-			drawSnake();
+				ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
 
-			console.log(world.snake_head_idx());
+				drawWorld();
+				drawSnake();
+
+				world.update();
+
+				console.log('Updating');
+			}, 100);
 		});
+	});
+
+	onDestroy(() => {
+		// cleanup
+		clearInterval(interval);
 	});
 
 	const drawWorld = () => {
