@@ -1,8 +1,9 @@
 import { World, Direction, type InitOutput } from 'wasm-test';
+import { random } from './utils';
 
 export const CELL_SIZE = 48;
 export const WORLD_WIDTH = 16;
-export const SNAKE_SPAWN_IDX = Date.now() % (WORLD_WIDTH * WORLD_WIDTH);
+export const SNAKE_SPAWN_IDX = random(WORLD_WIDTH * WORLD_WIDTH);
 
 const FPS = 10;
 

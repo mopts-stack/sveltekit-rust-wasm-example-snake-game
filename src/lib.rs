@@ -18,7 +18,7 @@ extern "C" {
 #[wasm_bindgen(module = "/web/src/lib/utils.ts")]
 extern "C" {
     // from javascript defined in utils
-    fn now() -> usize;
+    fn random(max: usize) -> usize;
 }
 
 #[wasm_bindgen]
@@ -30,7 +30,7 @@ pub enum Direction {
 }
 
 #[wasm_bindgen]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct SnakeCell(usize);
 
 struct Snake {
@@ -62,17 +62,28 @@ pub struct World {
     reward_cell: usize,
 }
 
+fn spawn_reward(snake_body: &[SnakeCell], size: usize) -> usize {
+    loop {
+        let reward_cell = random(size);
+
+        if !snake_body.contains(&SnakeCell(reward_cell)) {
+            return reward_cell;
+        }
+    }
+}
+
 #[wasm_bindgen]
 impl World {
     pub fn new(width: usize, snake_idx: usize) -> Self {
         let size = width * width;
+        let snake = Snake::new(snake_idx, 3);
 
-        let reward_cell = now() % size;
+        let reward_cell = spawn_reward(&snake.body, size);
 
         Self {
             width,
             size,
-            snake: Snake::new(snake_idx, 3),
+            snake,
             next_cell: None,
             reward_cell,
         }
