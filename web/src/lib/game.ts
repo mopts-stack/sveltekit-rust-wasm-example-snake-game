@@ -1,4 +1,4 @@
-import { World } from 'wasm-test';
+import { World, Direction } from 'wasm-test';
 
 export const CELL_SIZE = 48;
 export const WORLD_WIDTH = 16;
@@ -18,6 +18,28 @@ export const update = (ctx: CanvasRenderingContext2D | null, canvas: HTMLCanvasE
         // invoke update again before repaint event
         requestAnimationFrame(() => update(ctx, canvas, world));
     }, 1000 / FPS);
+}
+
+export const keyboardEvents = (e: KeyboardEvent, world: World | null) => {
+    if (world === null) return;
+
+    switch (e.code) {
+        case "ArrowUp":
+            world.change_snake_dir(Direction.Up);
+            break;
+
+        case "ArrowDown":
+            world.change_snake_dir(Direction.Down);
+            break;
+
+        case "ArrowRight":
+            world.change_snake_dir(Direction.Right);
+            break;
+
+        case "ArrowLeft":
+            world.change_snake_dir(Direction.Left);
+            break;
+    }
 }
 
 export const draw = (ctx: CanvasRenderingContext2D | null, canvas: HTMLCanvasElement | null, world: World | null) => {

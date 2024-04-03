@@ -14,7 +14,9 @@ extern "C" {
 }
 
 // SNAKE GAME IMPLEMENTATION
-enum Direction {
+
+#[wasm_bindgen]
+pub enum Direction {
     Up,
     Down,
     Right,
@@ -64,6 +66,10 @@ impl World {
 
     pub fn snake_head_idx(&self) -> usize {
         self.snake.body[0].0
+    }
+
+    pub fn change_snake_dir(&mut self, direction: Direction) {
+        self.snake.direction = direction;
     }
 
     pub fn update(&mut self) {

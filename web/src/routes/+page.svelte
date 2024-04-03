@@ -1,12 +1,16 @@
 <script lang="ts">
 	import init, { World } from 'wasm-test';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
-	import { update, draw, CELL_SIZE, WORLD_WIDTH, SNAKE_SPAWN_IDX } from '$lib/game';
+	import { update, draw, keyboardEvents, CELL_SIZE, WORLD_WIDTH, SNAKE_SPAWN_IDX } from '$lib/game';
 
 	let ctx: CanvasRenderingContext2D | null;
 	let canvas: HTMLCanvasElement | null;
 	let world: World | null;
+
+	function handleKeyDown(e: KeyboardEvent) {
+		keyboardEvents(e, world);
+	}
 
 	onMount(() => {
 		init().then((_) => {
@@ -22,7 +26,19 @@
 
 			// Update loop
 			update(ctx, canvas, world);
+
+			// Add the event listener if in a browser environment
+			if (typeof window !== 'undefined') {
+				document.addEventListener('keydown', handleKeyDown);
+			}
 		});
+	});
+
+	onDestroy(() => {
+		// Remove the event listener if in a browser environment
+		if (typeof window !== 'undefined') {
+			document.removeEventListener('keydown', handleKeyDown);
+		}
 	});
 </script>
 
