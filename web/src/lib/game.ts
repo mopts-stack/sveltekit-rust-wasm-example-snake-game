@@ -1,5 +1,6 @@
-import { World, Direction, type InitOutput } from 'wasm-test';
+import { World, Direction, type InitOutput, GameStatus } from 'wasm-test';
 import { random } from './utils';
+import { gameStore } from './store';
 
 export const CELL_SIZE = 48;
 export const WORLD_WIDTH = 5;
@@ -9,6 +10,24 @@ const FPS = 5;
 
 export class SnakeGame {
     constructor(readonly wasm: InitOutput, readonly ctx: CanvasRenderingContext2D, readonly canvas: HTMLCanvasElement, readonly world: World) {
+    }
+
+    status = () => {
+        return this.world.game_status();
+    }
+
+    status_text = () => {
+        return this.world.game_status_text();
+    }
+
+    has_started = () => {
+        return this.world.game_status() !== undefined;
+    }
+
+    start = () => {
+        this.world.start_game();
+
+        this.mainLoop();
     }
 
     mainLoop = () => {
@@ -21,6 +40,8 @@ export class SnakeGame {
 
             // invoke update again before repaint event
             requestAnimationFrame(this.mainLoop);
+
+            gameStore.updateStatus(this);
         }, 1000 / FPS);
     }
 

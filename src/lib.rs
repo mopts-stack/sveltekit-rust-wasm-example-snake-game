@@ -30,6 +30,14 @@ pub enum Direction {
 }
 
 #[wasm_bindgen]
+#[derive(Copy, Clone)]
+pub enum GameStatus {
+    Won,
+    Lost,
+    Played,
+}
+
+#[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SnakeCell(usize);
 
@@ -60,6 +68,7 @@ pub struct World {
     snake: Snake,
     next_cell: Option<SnakeCell>,
     reward_cell: usize,
+    status: Option<GameStatus>,
 }
 
 fn spawn_reward(snake_body: &[SnakeCell], size: usize) -> usize {
@@ -86,6 +95,7 @@ impl World {
             snake,
             next_cell: None,
             reward_cell,
+            status: None,
         }
     }
 
@@ -103,6 +113,23 @@ impl World {
 
     pub fn snake_head_idx(&self) -> usize {
         self.snake.body[0].0
+    }
+
+    pub fn start_game(&mut self) {
+        self.status = Some(GameStatus::Played);
+    }
+
+    pub fn game_status(&self) -> Option<GameStatus> {
+        self.status
+    }
+
+    pub fn game_status_text(&self) -> String {
+        match self.status {
+            Some(GameStatus::Won) => String::from("You have won!"),
+            Some(GameStatus::Lost) => String::from("You have lost!"),
+            Some(GameStatus::Played) => String::from("Playing..."),
+            None => String::from("Idle"),
+        }
     }
 
     pub fn change_snake_dir(&mut self, direction: Direction) {
@@ -135,34 +162,40 @@ impl World {
     }
 
     pub fn calculate_snake_next_cell(&mut self) {
-        let temp = self.snake.body.clone();
+        match self.status {
+            Some(GameStatus::Played) => {
+                let temp = self.snake.body.clone();
 
-        match self.next_cell {
-            Some(cell) => {
-                self.snake.body[0] = cell;
-                self.next_cell = None;
+                match self.next_cell {
+                    Some(cell) => {
+                        self.snake.body[0] = cell;
+                        self.next_cell = None;
+                    }
+                    None => {
+                        self.snake.body[0] = self.generate_next_snake_cell(&self.snake.direction);
+                    }
+                }
+
+                let length = self.snake.body.len();
+                for i in 1..length {
+                    self.snake.body[i] = SnakeCell(temp[i - 1].0);
+                }
+
+                // check if the head colliding with the reward
+                if self.reward_cell == self.snake_head_idx() {
+                    // make sure snake doesn't grow to the size of the grid
+                    if self.snake.body.len() < self.size {
+                        self.reward_cell = spawn_reward(&self.snake.body, self.size);
+                    } else {
+                        // send it off screen
+                        self.reward_cell = 1000;
+                        self.status = Some(GameStatus::Won);
+                    }
+
+                    self.snake.body.push(SnakeCell(self.snake.body[1].0));
+                }
             }
-            None => {
-                self.snake.body[0] = self.generate_next_snake_cell(&self.snake.direction);
-            }
-        }
-
-        let length = self.snake.body.len();
-        for i in 1..length {
-            self.snake.body[i] = SnakeCell(temp[i - 1].0);
-        }
-
-        // check if the head colliding with the reward
-        if self.reward_cell == self.snake_head_idx() {
-            // make sure snake doesn't grow to the size of the grid
-            if self.snake.body.len() < self.size {
-                self.reward_cell = spawn_reward(&self.snake.body, self.size);
-            } else {
-                // send it off screen
-                self.reward_cell = 1000;
-            }
-
-            self.snake.body.push(SnakeCell(self.snake.body[1].0));
+            _ => {}
         }
     }
 

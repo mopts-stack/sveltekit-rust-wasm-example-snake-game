@@ -3,6 +3,7 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	import { SnakeGame, CELL_SIZE, WORLD_WIDTH, SNAKE_SPAWN_IDX } from '$lib/game';
+	import { gameStore } from '$lib/store';
 
 	let game: SnakeGame;
 
@@ -21,13 +22,12 @@
 			// initial render
 			game.render();
 
-			// Main Game Loop
-			game.mainLoop();
-
 			// Add the event listener if in a browser environment
 			if (typeof window !== 'undefined') {
 				document.addEventListener('keydown', game.keyboardEvents);
 			}
+
+			gameStore.updateStatus(game);
 		});
 	});
 
@@ -37,9 +37,25 @@
 			document.removeEventListener('keydown', game.keyboardEvents);
 		}
 	});
+
+	const handleButtonClick = () => {
+		game.start();
+		gameStore.updateStatus(game);
+	};
 </script>
 
 <div class="content-wrapper">
+	<div class="game-panel">
+		<div class="flex">
+			<div class="label">Status:</div>
+
+			<div id="game-status">{$gameStore.status}</div>
+		</div>
+
+		<div class="flex">
+			<button disabled={$gameStore.disableButton} on:click={handleButtonClick}>Play</button>
+		</div>
+	</div>
 	<canvas id="game-canvas"></canvas>
 </div>
 
@@ -54,5 +70,18 @@
 		align-items: center;
 		justify-content: center;
 		flex-direction: column;
+	}
+
+	.game-panel {
+		margin-bottom: 20px;
+	}
+
+	.flex {
+		display: flex;
+	}
+
+	.label {
+		font-weight: bold;
+		margin-right: 10px;
 	}
 </style>
