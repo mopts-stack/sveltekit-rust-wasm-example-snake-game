@@ -67,16 +67,16 @@ pub struct World {
     size: usize,
     snake: Snake,
     next_cell: Option<SnakeCell>,
-    reward_cell: usize,
+    reward_cell: Option<usize>,
     status: Option<GameStatus>,
 }
 
-fn spawn_reward(snake_body: &[SnakeCell], size: usize) -> usize {
+fn spawn_reward(snake_body: &[SnakeCell], size: usize) -> Option<usize> {
     loop {
         let reward_cell = random(size);
 
         if !snake_body.contains(&SnakeCell(reward_cell)) {
-            return reward_cell;
+            return Some(reward_cell);
         }
     }
 }
@@ -114,7 +114,7 @@ impl World {
         self.size
     }
 
-    pub fn reward_cell(&self) -> usize {
+    pub fn reward_cell(&self) -> Option<usize> {
         self.reward_cell
     }
 
@@ -193,13 +193,13 @@ impl World {
             }
 
             // check if the head colliding with the reward
-            if self.reward_cell == self.snake_head_idx() {
+            if self.reward_cell == Some(self.snake_head_idx()) {
                 // make sure snake doesn't grow to the size of the grid
                 if length < self.size {
                     self.reward_cell = spawn_reward(&self.snake.body, self.size);
                 } else {
                     // send it off screen
-                    self.reward_cell = 1000;
+                    self.reward_cell = None;
                     self.status = Some(GameStatus::Won);
                 }
 

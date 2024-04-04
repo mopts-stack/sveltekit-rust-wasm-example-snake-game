@@ -116,6 +116,8 @@ export class SnakeGame {
     private renderReward = () => {
         const idx = this.world.reward_cell();
 
+        if (idx === undefined) return;
+
         const col = idx % this.world.width();
         const row = Math.floor(idx / this.world.width());
 
