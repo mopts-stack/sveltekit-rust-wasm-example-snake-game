@@ -29,6 +29,10 @@ export class SnakeGame {
         return this.world.game_status() !== undefined;
     }
 
+    points = () => {
+        return this.world.points();
+    }
+
     start = () => {
         this.world.start_game();
 
@@ -128,10 +132,6 @@ export class SnakeGame {
         this.ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
         this.ctx.stroke();
-
-        // if (idx === 1000) {
-        //     alert("You Won!");
-        // }
     }
 }
 

@@ -57,6 +57,12 @@
 		</div>
 
 		<div class="flex">
+			<div class="label">Points:</div>
+
+			<div id="game-status">{$gameStore.points}</div>
+		</div>
+
+		<div class="flex">
 			<button disabled={$gameStore.disableButton} on:click={handleButtonClick}>Play</button>
 		</div>
 	</div>

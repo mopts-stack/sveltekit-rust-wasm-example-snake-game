@@ -69,6 +69,7 @@ pub struct World {
     next_cell: Option<SnakeCell>,
     reward_cell: Option<usize>,
     status: Option<GameStatus>,
+    points: usize,
 }
 
 fn spawn_reward(snake_body: &[SnakeCell], size: usize) -> Option<usize> {
@@ -96,6 +97,7 @@ impl World {
             next_cell: None,
             reward_cell,
             status: None,
+            points: 0,
         }
     }
 
@@ -104,6 +106,7 @@ impl World {
         self.status = None;
         self.snake = Snake::new(random(self.size), 3);
         self.reward_cell = spawn_reward(&self.snake.body, self.size);
+        self.points = 0;
     }
 
     pub fn width(&self) -> usize {
@@ -116,6 +119,10 @@ impl World {
 
     pub fn reward_cell(&self) -> Option<usize> {
         self.reward_cell
+    }
+
+    pub fn points(&self) -> usize {
+        self.points
     }
 
     pub fn snake_head_idx(&self) -> usize {
@@ -197,6 +204,7 @@ impl World {
                 // make sure snake doesn't grow to the size of the grid
                 if length < self.size {
                     self.reward_cell = spawn_reward(&self.snake.body, self.size);
+                    self.points += 1;
                 } else {
                     // send it off screen
                     self.reward_cell = None;

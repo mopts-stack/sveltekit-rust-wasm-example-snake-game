@@ -5,11 +5,13 @@ import type { SnakeGame } from './game';
 export type GameStore = {
     status: string,
     disableButton: boolean,
+    points: number,
 }
 
 const stat = writable<GameStore>({
     disableButton: true,
     status: 'None',
+    points: 0,
 });
 
 function createGameStatusStore() {
@@ -20,6 +22,7 @@ function createGameStatusStore() {
         reset: () => set({
             disableButton: true,
             status: 'None',
+            points: 0,
         }),
         changeDisabled: (value: boolean) => update(s => {
             s.disableButton = value;
@@ -37,6 +40,8 @@ function createGameStatusStore() {
             if (game && game.status() === GameStatus.Played) {
                 s.disableButton = true;
             }
+
+            s.points = game ? game.points() : 0;
 
             return s;
         }),
