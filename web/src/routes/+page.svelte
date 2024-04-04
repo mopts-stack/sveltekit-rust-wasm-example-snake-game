@@ -1,5 +1,5 @@
 <script lang="ts">
-	import init, { World } from 'wasm-test';
+	import init, { GameStatus, World } from 'wasm-test';
 	import { onDestroy, onMount } from 'svelte';
 
 	import { SnakeGame, CELL_SIZE, WORLD_WIDTH, SNAKE_SPAWN_IDX } from '$lib/game';
@@ -8,6 +8,7 @@
 	let game: SnakeGame;
 
 	onMount(() => {
+		gameStore.reset();
 		init().then((wasm) => {
 			const world = World.new(WORLD_WIDTH, SNAKE_SPAWN_IDX);
 
@@ -39,8 +40,11 @@
 	});
 
 	const handleButtonClick = () => {
-		game.start();
-		gameStore.updateStatus(game);
+		if (game.status() === GameStatus.Lost || game.status() === GameStatus.Won) {
+			game.reset();
+		} else {
+			game.start();
+		}
 	};
 </script>
 

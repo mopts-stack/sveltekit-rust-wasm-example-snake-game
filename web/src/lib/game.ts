@@ -12,6 +12,11 @@ export class SnakeGame {
     constructor(readonly wasm: InitOutput, readonly ctx: CanvasRenderingContext2D, readonly canvas: HTMLCanvasElement, readonly world: World) {
     }
 
+    reset = () => {
+        this.world.reset();
+        this.world.start_game();
+    }
+
     status = () => {
         return this.world.game_status();
     }

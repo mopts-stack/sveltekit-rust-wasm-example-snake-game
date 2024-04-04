@@ -31,7 +31,12 @@ function createGameStatusStore() {
         }),
         updateStatus: (game?: SnakeGame) => update(s => {
             s.status = game ? game.status_text() : 'None';
-            s.disableButton = game ? game.status() !== undefined : true;
+
+            s.disableButton = false;
+
+            if (game && game.status() === GameStatus.Played) {
+                s.disableButton = true;
+            }
 
             return s;
         }),
